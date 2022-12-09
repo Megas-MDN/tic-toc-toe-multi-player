@@ -93,7 +93,7 @@ function App() {
     console.log(player);
   }
 
-  const resetAll = () => {
+  const resetAll = async () => {
     // setBlocks([]);
     blocks.forEach((el) => {
           updateDoc(doc(db, 'grid', el.id), {
@@ -102,7 +102,9 @@ function App() {
         })
       })
     setReset(!reset);
-    setPlayer('X');
+    await updateDoc(doc(db, 'player', player.id), {
+      turn: 'X',  
+    })
   }
 
   return (
