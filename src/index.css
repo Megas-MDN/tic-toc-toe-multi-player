@@ -5,38 +5,48 @@
 }
 
 body {
-  border: 1px solid red;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+
+.block-container:nth-child(2),
+.block-container:nth-child(5),
+.block-container:nth-child(8) {
+  border-right: 4px solid gold;
+  border-left: 4px solid gold;
+}
+
+.block-container:nth-child(4),
+.block-container:nth-child(5),
+.block-container:nth-child(6) {
+  border-top: 4px solid gold;
+  border-bottom: 4px solid gold;
+}
+
 .Toe-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  border: 1px solid red;
-  margin: auto;
-  gap: 5px;
   width: 285px;
   height: 288px;
-  background: blue;
 }
 
 .Toe-container button {
   width: 90px;
   height: 90px;
   font-size: 2rem;
+  border: none;
+  background-color: transparent;
+}
+
+.Toe-container button:disabled {
+  border: none;
 }
 
 .btns-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.btns-container button {
-  height: 30px;
-  width: 100px;
 }
