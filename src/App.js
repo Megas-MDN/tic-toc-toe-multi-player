@@ -1,5 +1,5 @@
 import { collection, doc, onSnapshot, query, updateDoc } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import './App.css';
 import './components/Block';
 import Block from './components/Block';
@@ -13,6 +13,14 @@ function App() {
   const [player, setPlayer] = useState({});
   const [reset, setReset] = useState(false);
   const [blocks, setBlocks] = useState([]);
+  const [winner, setWinner] = useState(false);
+
+  const blocos = useRef(null);
+  // console.log('blocos', blocos.current.childNodes[0].firstChild.textContent);
+
+  // 012, 345, 678
+  // 036, 147, 258
+  // 048, 246
 
   useEffect(() => {
     // arrEmpty();
@@ -56,6 +64,7 @@ function App() {
       });
       // setBlocks(arrDBBlocks)
       setPlayer(arrDBBlocks[0]);
+      setWinner(arrDBBlocks[0].win);
       console.log(arrDBBlocks);
     });
     return showDataPlayer;
@@ -74,6 +83,42 @@ function App() {
   //   // return arr;
   // }
 
+  const getCombinations = () => {
+      // 012, 345, 678
+  // 036, 147, 258
+  // 048, 246
+    const combinations = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [0,4,8], [2,5,8],[2,4,6]]
+
+    const values = blocos.current.childNodes;
+    const playerX = [];
+    const playerO = [];
+
+    values.forEach((e, i) => {
+      if (e.textContent === 'X') playerX.push(i)
+      if (e.textContent === 'O') playerO.push(i);
+      // console.log('values', e.textContent)
+    })
+
+    console.log(combinations.includes(playerX || playerO))
+
+    combinations.forEach(([i, j, k]) => {
+      if (playerX.includes(i) && playerX.includes(j) && playerX.includes(k)) {
+        console.log('player X wins');
+         updateDoc(doc(db, 'player', player.id), {
+          win: true,  
+        })
+      }
+
+      if (playerO.includes(i) && playerO.includes(j) && playerO.includes(k)) {
+        console.log('player O wins');
+        updateDoc(doc(db, 'player', player.id), {
+          win: true,  
+        })
+      }
+    } )
+
+    console.log('players:', playerX, playerO);
+  };
 
   const handleClick = async ({id, _gridid}) => {
     await updateDoc(doc(db, 'grid', id), {
@@ -90,7 +135,10 @@ function App() {
       })
     }
     // console.log(player);
-    console.log(player);
+    // console.log(player);
+    
+    getCombinations();
+
   }
 
   const resetAll = async () => {
@@ -102,18 +150,21 @@ function App() {
         })
       })
     setReset(!reset);
+    setWinner(false);
     await updateDoc(doc(db, 'player', player.id), {
-      turn: 'X',  
+      turn: 'X',
+      win: false,  
     })
   }
 
   return (
     <div>
+      <h1>{winner && `The Player ${ player.turn === 'X' ? 'O' : 'X'} wins.`}</h1>
       <div className='btns-container'>
         <h1>{`${player.turn} to play`}</h1>
         <button type='button' onClick={resetAll}>Reset All</button>
       </div>
-      <div  className="Toe-container">
+      <div  className="Toe-container" ref={ blocos }>
     {
       blocks.map((_, i)=> <Block 
       key={blocks[i].id}
