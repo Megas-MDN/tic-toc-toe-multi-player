@@ -10,13 +10,14 @@ import { db } from './firebase';
 
 function App() {
   // const [arrBlocks, setArrBlocks] = useState([]);
-  const [player, setPlayer] = useState('X');
+  const [player, setPlayer] = useState({});
   const [reset, setReset] = useState(false);
   const [blocks, setBlocks] = useState([]);
 
   useEffect(() => {
     // arrEmpty();
     // setArrBlocks([...arrEmpty()]);
+    loadingPlayer();
     const showData = loadingData();
     return () => showData();
   },[]);
@@ -42,7 +43,22 @@ function App() {
       setBlocks(arrDBBlocks)
       console.log(arrDBBlocks);
     });
+
     return showData;
+  }
+
+  const loadingPlayer = () => {
+    const q_player = query(collection(db, 'player'));
+    const showDataPlayer = onSnapshot(q_player, (el) => {
+      let arrDBBlocks = [];
+      el.forEach((doc) => {
+        arrDBBlocks.push({...doc.data(), id: doc.id})
+      });
+      // setBlocks(arrDBBlocks)
+      setPlayer(arrDBBlocks[0]);
+      console.log(arrDBBlocks);
+    });
+    return showDataPlayer;
   }
 
   // const arrEmpty = () => { // criação dinamica de blocks
@@ -62,15 +78,19 @@ function App() {
   const handleClick = async ({id, _gridid}) => {
     await updateDoc(doc(db, 'grid', id), {
       disabled: true,
-      content: player,  
+      content: player.turn,  
     })
-    if (player === 'X') {
-      setPlayer('O')
+    if (player.turn === 'X') {
+      await updateDoc(doc(db, 'player', player.id), {
+        turn: 'O',  
+      })
     } else {
-      setPlayer('X')
+      await updateDoc(doc(db, 'player', player.id), {
+        turn: 'X',  
+      })
     }
     // console.log(player);
-    console.log(blocks);
+    console.log(player);
   }
 
   const resetAll = () => {
@@ -88,7 +108,7 @@ function App() {
   return (
     <div>
       <div className='btns-container'>
-        <h1>{`${player} to play`}</h1>
+        <h1>{`${player.turn} to play`}</h1>
         <button type='button' onClick={resetAll}>Reset All</button>
       </div>
       <div  className="Toe-container">
